@@ -1,8 +1,9 @@
 package com.lee.model;
+import java.util.*;
 
 public class Dice {
-    private int value = 0;
     public static Dice dice = null;
+    private int value = 0;
 
     public static Dice getInstance(){
         if (dice == null){

@@ -19,10 +19,10 @@ public class BridgeMap {
                 "C U R", "C L R", "S L U", "P D U", "C D U", "C D U", "b D U", "C D U", "C D U", "E"
         };
     }
+
     public String[] getMapData(){
         return mapData;
     }
-
 
     public void setMapData(){
 
