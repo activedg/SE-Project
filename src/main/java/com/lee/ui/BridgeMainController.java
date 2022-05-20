@@ -2,15 +2,10 @@ package com.lee.ui;
 
 import com.lee.model.Player;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -37,6 +32,12 @@ public class BridgeMainController implements Initializable {
 
     private Player curPlayer = null;
     private int moveCount;
+
+    private ImageView diceImage;
+    private Button rollButton;
+    private Label rollLabel;
+    private TextField moveTF;
+    private Button exitButton;
 
 
     @FXML private Label mainActionLabel;
@@ -90,7 +91,7 @@ public class BridgeMainController implements Initializable {
                 Stage primaryStage = BridgeGame.getStage();
                 primaryStage.setX(500);
                 primaryStage.setY(50);
-                primaryStage.setWidth(1200);
+                primaryStage.setWidth(1250);
                 primaryStage.setHeight(900);
                 BridgeMapView bridgeMapView = new BridgeMapView();
                 bridgeMapView.setMap();
@@ -130,34 +131,35 @@ public class BridgeMainController implements Initializable {
                 rectangle.setStrokeWidth(2);
 
                 File file = new File("src/main/resources/com/lee/image/dice1.png");
-                ImageView diceImage= new ImageView(new Image(file.toURI().toString()));
+                diceImage= new ImageView(new Image(file.toURI().toString()));
                 diceImage.setFitHeight(100);
                 diceImage.setFitWidth(100);
                 diceImage.setPreserveRatio(true);
                 StackPane.setAlignment(diceImage, Pos.TOP_LEFT);
                 StackPane.setMargin(diceImage, new Insets(20, 0, 0, 10));
 
-                Button rollButton = new Button("Roll");
+                rollButton = new Button("Roll");
                 rollButton.setPrefSize(50, 30);
                 StackPane.setAlignment(rollButton, Pos.BOTTOM_LEFT);
                 StackPane.setMargin(rollButton, new Insets(0, 0 , 50, 35));
 
-                Label rollLabel = new Label("Click Roll button to \nroll a dice.");
-                rollLabel.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 18));
-                StackPane.setAlignment(rollLabel, Pos.TOP_RIGHT);
-                StackPane.setMargin(rollLabel, new Insets(20, 40, 0 , 0));
+                rollLabel = new Label("Click Roll button to \nroll a dice.");
+                rollLabel.setPrefSize(220, 100);
+                rollLabel.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 17));
+                StackPane.setAlignment(rollLabel, Pos.TOP_CENTER);
+                StackPane.setMargin(rollLabel, new Insets(0, 0, 0 , 120));
 
-                TextField moveTF = new TextField();
-                moveTF.setPrefSize(150, 30);
+                moveTF = new TextField();
+                moveTF.setPrefSize(180, 30);
                 moveTF.setMaxWidth(180);
-                moveTF.setFont(Font.font("Arial", 14));
+                moveTF.setFont(Font.font("Arial", 13));
                 moveTF.setPromptText("Combinations of U,D,L,R");
                 moveTF.setFocusTraversable(false);
                 moveTF.setDisable(true);
                 StackPane.setAlignment(moveTF, Pos.CENTER_RIGHT);
-                StackPane.setMargin(moveTF, new Insets(0, 35, 20, 0));
+                StackPane.setMargin(moveTF, new Insets(0, 45, 20, 0));
 
-                Button exitButton = new Button("Exit");
+                exitButton = new Button("Exit");
                 exitButton.setPrefSize(50, 30);
                 exitButton.setDisable(true);
                 StackPane.setAlignment(exitButton, Pos.BOTTOM_RIGHT);
@@ -167,7 +169,7 @@ public class BridgeMainController implements Initializable {
                 root.getChildren().add(dicePane);
 
                 rollButton.setOnAction(actionEvent -> {
-                    roll(diceImage, rollButton, exitButton, moveTF, bridgeMapView);
+                    roll(bridgeMapView);
                 });
 
                 exitButton.setOnAction(actionEvent -> {
@@ -182,19 +184,18 @@ public class BridgeMainController implements Initializable {
                     if (keyEvent.getCode().equals(KeyCode.ENTER)){
                         String moveStr = moveTF.getText().toString().toUpperCase(Locale.ROOT);
                         if (moveStr.isEmpty()){
-                            moveTF.setPromptText("Combinations of U,D,L,R");
+                            rollLabel.setText("Length should be "+moveCount +".\nInput combinations of \nU, D, L, R or u, d, l, r.");
                         }
                         else {
                             moveStr = moveStr.replaceAll(" ", "");
                             if (moveStr.length() != moveCount) {
-                                moveTF.setText("Length should be " + moveCount);
-                                // Should Implement
+                                rollLabel.setText("Length should be "+moveCount +".\nInput combinations of \nU, D, L, R or u, d, l, r.");
                             }
                             else if (bridgeMapView.checkMoveInfo(moveStr) == false){
-                                moveTF.setText("Invalid Move. Input Again");
-                                System.out.println("Current Pos : " + bridgeMapView.getCurrentPlayer().getXPos() + ", "  + bridgeMapView.getCurrentPlayer().getYPos());
+                                rollLabel.setText("Invalid move!! Input again.\nLength should be "+moveCount +".");
                             } else{
-                                bridgeMapView.move(moveStr, exitButton);
+                                rollLabel.setText("Player is moving..");
+                                bridgeMapView.move(moveStr, exitButton, rollLabel);
                                 moveTF.setDisable(true);
                             }
                         }
@@ -216,7 +217,7 @@ public class BridgeMainController implements Initializable {
         });
     }
 
-    private void roll(ImageView imageView, Button rollButton, Button exitButton, TextField moveTF, BridgeMapView bridgeMapView){
+    private void roll(BridgeMapView bridgeMapView){
         Random random = new Random();
         final int[] randomNum = {0};
 
@@ -227,29 +228,14 @@ public class BridgeMainController implements Initializable {
                     for (int i = 0; i < 15; i++) {
                         randomNum[0] = (random.nextInt(6) + 1);
                         File file = new File("src/main/resources/com/lee/image/dice" + randomNum[0] + ".png");
-                        imageView.setImage(new Image(file.toURI().toString()));
-                        imageView.setFitHeight(100);
-                        imageView.setFitWidth(100);
-                        imageView.setPreserveRatio(true);
+                        diceImage.setImage(new Image(file.toURI().toString()));
+                        diceImage.setFitHeight(100);
+                        diceImage.setFitWidth(100);
+                        diceImage.setPreserveRatio(true);
                         Thread.sleep(50);
                     }
-                    moveTF.setDisable(false);
                     moveCount = randomNum[0] - curPlayer.getBridgeCardNum();
-                    // 이동 가능한 move가 0번일 때
-                    if (moveCount <= 0 ) {
-                        moveCount = 0;
-                        moveTF.setDisable(true);
-                        exitButton.setDisable(false);
-                        bridgeMapView.getCurrentPlayer().rest();
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                bridgeMapView.updatePlayerCardInfo("Bridge", 1);
-                            }
-                        });
-                    }
-                    else moveTF.setPromptText("   " + moveCount + " moves possible");
-
+                    setViewsAfterRoll(bridgeMapView);
                     this.interrupt();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -258,5 +244,31 @@ public class BridgeMainController implements Initializable {
         };
         thread.start();
     }
+    private void setViewsAfterRoll(BridgeMapView bridgeMapView){
+        moveTF.setDisable(false);
+        // 이동 가능한 move가 0번일 때
+        if (moveCount <= 0 ) {
+            moveCount = 0;
+            moveTF.setDisable(true);
+            exitButton.setDisable(false);
+            bridgeMapView.getCurrentPlayer().rest();
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    rollLabel.setText("Cannot move. Rest\nusing one bridge card.");
+                    bridgeMapView.updatePlayerCardInfo("Bridge", 1);
+                }
+            });
+        }
+        else {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    rollLabel.setText("You can move "+moveCount + " moves.\n" + "Input combinations of \nU, D, L, R or u, d, l, r.");
+                    moveTF.setPromptText("   " + moveCount + " moves possible");
+                }
+            });
+        }
 
+    }
 }

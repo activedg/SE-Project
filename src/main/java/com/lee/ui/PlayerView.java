@@ -13,6 +13,9 @@ public class PlayerView extends StackPane {
     private Circle circle;
     private Text text;
 
+    private Boolean isOnBridge = false;
+    private Character moveType;
+
     PlayerView(int num, int xPos, int yPos, Color color){
         this.player = new Player(xPos, yPos);
         circle = new Circle();
@@ -27,5 +30,15 @@ public class PlayerView extends StackPane {
     public Player getPlayer() {
         return player;
     }
+    public Boolean getIsOnBridge() { return isOnBridge; }
 
+    public void setIsOnBridge(Boolean isOnBridge, Character moveType){
+        this.isOnBridge = isOnBridge;
+        this.moveType = moveType;
+    }
+
+    public boolean checkBridgeCrossed(Character nowMove){
+        if (isOnBridge && this.moveType == nowMove) return true;
+        return false;
+    }
 }

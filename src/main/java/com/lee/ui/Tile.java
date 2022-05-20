@@ -18,9 +18,14 @@ import java.io.File;
 public class Tile extends StackPane {
     private String type;
     private Rectangle rectangle = new Rectangle();
+    private String backMove;
+    private String frontMove;
 
-    public Tile(String type, int x, int y){
+    public Tile(String type, int x, int y, String backMove, String frontMove){
         this.type = type;
+        this.backMove = backMove;
+        this.frontMove = frontMove;
+
         if (type.equals("START") || type.equals("END")){
             rectangle.setWidth(BridgeMapView.TILE_SIZE * 2);
             rectangle.setHeight(BridgeMapView.TILE_SIZE * 2);
@@ -88,5 +93,9 @@ public class Tile extends StackPane {
             }
         });
         type = "CELL";
+    }
+
+    public boolean isBackMove(String backMove){
+        return this.backMove.equals(backMove);
     }
 }

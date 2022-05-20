@@ -26,6 +26,7 @@ public class BridgeMapView {
     public static final Color[] colors = {Color.BLUE, Color.RED, Color.GREEN, Color.PURPLE};
 
     private int x = START_X, y= START_Y;
+    private int endCount = 0;
     private Pane root;
     private Group tileGroup = new Group();
     private BridgeMap map;
@@ -62,6 +63,7 @@ public class BridgeMapView {
     public Player getCurrentPlayer(){
         return playerViews[turn-1].getPlayer();
     }
+    public int getEndCount() {return endCount; }
 
     public void setMap(){
         // 나중에 지워야 함
@@ -75,7 +77,7 @@ public class BridgeMapView {
             String[] temp = mapData[i].split(" ");
             Tile tile;
             if (i == 0 && temp[0].equals("S")) {
-                tile = new Tile("START", x, y);
+                tile = new Tile("START", x, y, null, temp[1]);
                 // tiles[x][y] = tile;
                 switch (temp[1]) {
                     case "R":
@@ -89,30 +91,30 @@ public class BridgeMapView {
                 }
                 initPlayerPos(temp[1]);
             } else if (i == mapData.length - 1 && temp[0].equals("E")) {
-                tile = new Tile("END", x, y);
+                tile = new Tile("END", x, y, null, null);
                 tiles[x][y] = tile;
             } else if (temp[0].equals("S")){
-                tile = new Tile("SAW", x ,y);
+                tile = new Tile("SAW", x ,y, temp[1], temp[2]);
                 tiles[x][y] = tile;
                 setNextXY(temp[2]);
             } else if (temp[0].equals("P")) {
-                tile = new Tile("PHILIPS", x, y);
+                tile = new Tile("PHILIPS", x, y, temp[1], temp[2]);
                 tiles[x][y] = tile;
                 setNextXY(temp[2]);
             } else if (temp[0].equals("H")){
-                tile = new Tile("HAMMER", x, y);
+                tile = new Tile("HAMMER", x, y, temp[1], temp[2]);
                 tiles[x][y] = tile;
                 setNextXY(temp[2]);
             } else if (temp[0].equals("B")){
-                tile = new Tile("INTERSECT", x ,y);
+                tile = new Tile("INTERSECT", x ,y, temp[1], temp[2]);
                 tiles[x][y] = tile;
-                Tile bridge = new Tile("BRIDGE", x+1, y);
+                Tile bridge = new Tile("BRIDGE", x+1, y, "L", "R");
                 tiles[x+1][y] = bridge;
                 tileGroup.getChildren().add(bridge);
                 setNextXY(temp[2]);
             }
             else {
-                tile = new Tile("CELL", x, y);
+                tile = new Tile("CELL", x, y, temp[1], temp[2]);
                 tiles[x][y] = tile;
                 setNextXY(temp[2]);
             }
@@ -234,10 +236,10 @@ public class BridgeMapView {
 
     private void initTurnInfo(){
         StackPane turnPane = new StackPane();
-        turnPane.setPrefSize(200, 125);
+        turnPane.setPrefSize(350, 125);
         turnPane.relocate(820, 15);
 
-        Rectangle rectangle = new Rectangle(200, 125);
+        Rectangle rectangle = new Rectangle(350, 125);
         rectangle.setFill(Color.WHITE);
         rectangle.setStroke(Color.BLACK);
         rectangle.setStrokeWidth(2);
@@ -249,16 +251,16 @@ public class BridgeMapView {
         StackPane.setMargin(turnLabel, new Insets(10, 0, 0, 0));
 
         Button diceButton = new Button("Roll a dice");
-        diceButton.setPrefSize(100, 30);
+        diceButton.setPrefSize(120, 30);
         diceButton.setFont(Font.font("Arial",14));
-        StackPane.setMargin(diceButton, new Insets(50, 0, 0 , 0));
+        StackPane.setMargin(diceButton, new Insets(45, 0, 0 , 0));
 
         Button restButton = new Button("Rest");
-        restButton.setPrefSize(100, 30);
+        restButton.setPrefSize(120, 30);
         restButton.setFont(Font.font("Arial",14));
 
         if (playerViews[0].getPlayer().getBridgeCardNum() == 0) restButton.setDisable(true);
-        StackPane.setMargin(restButton, new Insets(85, 0, 0, 0));
+        StackPane.setMargin(restButton, new Insets(80, 0, 0, 0));
 
         diceButton.setOnAction(actionEvent -> {
             myItemClick.onRollDiceClick(diceButton, restButton);
@@ -311,11 +313,17 @@ public class BridgeMapView {
             }
             if (tiles[curX][curY] == null)
                 return false;
+
+            if (endCount >= 1){
+                if (tiles[curX][curY].isBackMove(temp.toString()))
+                    return false;
+            }
+
         }
         return true;
     }
 
-    public void move(String moveStr, Button exitButton){
+    public void move(String moveStr, Button exitButton, Label rollLabel){
         Thread thread = new Thread(){
             private int curX = getCurrentPlayer().getXPos();
             private int curY = getCurrentPlayer().getYPos();
@@ -340,13 +348,7 @@ public class BridgeMapView {
                         Thread.sleep(1000);
                         switch (tiles[curX][curY].getType()){
                             case "BRIDGE":
-                                getCurrentPlayer().gainBridgeCard();
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        updatePlayerCardInfo("Bridge", 1);
-                                    }
-                                });
+                                playerViews[turn-1].setIsOnBridge(true, temp);
                                 break;
                             case "SAW":
                                 getCurrentPlayer().gainSawCard();
@@ -378,11 +380,45 @@ public class BridgeMapView {
                                     }
                                 });
                                 break;
+                            case "END":
+                                endCount++;
+                                playerViews[turn-1].relocate(curX * TILE_SIZE + 8, curY * TILE_SIZE + 8);
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        exitButton.setDisable(false);
+                                        if (endCount == 1){
+                                            rollLabel.setText("Player "+ turn + " finish!!\nCannot move backwards since now.");
+                                        }
+                                        else rollLabel.setText("Player "+ turn + " finish!!\n");
+                                    }
+                                });
+                                this.interrupt();
+                                return;
+                            default:
+                                if (playerViews[turn-1].getIsOnBridge()){
+                                    if (playerViews[turn-1].checkBridgeCrossed(temp)){
+                                        getCurrentPlayer().gainBridgeCard();
+                                        Platform.runLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                updatePlayerCardInfo("Bridge", 1);
+                                            }
+                                        });
+                                    }
+                                    playerViews[turn-1].setIsOnBridge(false, null);
+                                }
                         }
                         playerViews[turn-1].relocate(curX * TILE_SIZE + 8, curY * TILE_SIZE + 8);
                         getCurrentPlayer().setPos(curX, curY);
                     }
-                    exitButton.setDisable(false);
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            exitButton.setDisable(false);
+                            rollLabel.setText("Turn Finished!! \nClick Exit Button.");
+                        }
+                    });
                     this.interrupt();
                 } catch (InterruptedException e){
                     e.printStackTrace();
