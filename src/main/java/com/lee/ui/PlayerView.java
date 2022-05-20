@@ -16,10 +16,10 @@ public class PlayerView extends StackPane {
     PlayerView(int num, int xPos, int yPos, Color color){
         this.player = new Player(xPos, yPos);
         circle = new Circle();
-        circle.setRadius(10);
+        circle.setRadius(12);
         circle.setFill(color);
         text = new Text(Integer.toString(num));
-        text.setFont(Font.font("맑은 고딕", FontWeight.EXTRA_BOLD, 18));
+        text.setFont(Font.font("Arial", FontWeight.EXTRA_BOLD, 18));
         text.setFill(Color.WHITE);
         getChildren().addAll(circle, text);
     }

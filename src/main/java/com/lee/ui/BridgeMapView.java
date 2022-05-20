@@ -16,11 +16,11 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.*;
 
 public class BridgeMapView {
-    public static final int TILE_SIZE = 32;
+    public static final int TILE_SIZE = 36;
     public static final int WIDTH = 25;
     public static final int HEIGHT = 25;
 
-    public static final int START_X = 2;
+    public static final int START_X = 3;
     public static final int START_Y = 8;
 
     public static final Color[] colors = {Color.BLUE, Color.RED, Color.GREEN, Color.PURPLE};
@@ -48,12 +48,10 @@ public class BridgeMapView {
     }
 
     private onItemClick myItemClick;
-
     public interface onItemClick {
         void onRollDiceClick(Button diceButton, Button restButton);
         void onRestClick();
     }
-
     public void setMyClickListener(onItemClick myItemClick){
         this.myItemClick = myItemClick;
     }
@@ -61,7 +59,6 @@ public class BridgeMapView {
     public Parent getContentPane(){
         return root;
     }
-
     public Player getCurrentPlayer(){
         return playerViews[turn-1].getPlayer();
     }
@@ -166,7 +163,7 @@ public class BridgeMapView {
         int width = 720;
         StackPane infoPane = new StackPane();
         infoPane.setPrefSize(width, 120);
-        infoPane.relocate(START_X * TILE_SIZE, 10);
+        infoPane.relocate(2 * TILE_SIZE, 10);
         infoPane.setAlignment(Pos.CENTER_LEFT);
 
 
@@ -237,11 +234,11 @@ public class BridgeMapView {
 
     private void initTurnInfo(){
         StackPane turnPane = new StackPane();
-        turnPane.setPrefSize(200, 150);
-        turnPane.relocate(root.getPrefWidth()-300, 300);
+        turnPane.setPrefSize(200, 125);
+        turnPane.relocate(820, 15);
 
-        Rectangle rectangle = new Rectangle(200, 150);
-        rectangle.setFill(Color.GOLD);
+        Rectangle rectangle = new Rectangle(200, 125);
+        rectangle.setFill(Color.WHITE);
         rectangle.setStroke(Color.BLACK);
         rectangle.setStrokeWidth(2);
 
@@ -254,13 +251,14 @@ public class BridgeMapView {
         Button diceButton = new Button("Roll a dice");
         diceButton.setPrefSize(100, 30);
         diceButton.setFont(Font.font("Arial",14));
-        StackPane.setMargin(diceButton, new Insets(60, 0, 0 , 0));
+        StackPane.setMargin(diceButton, new Insets(50, 0, 0 , 0));
 
         Button restButton = new Button("Rest");
         restButton.setPrefSize(100, 30);
         restButton.setFont(Font.font("Arial",14));
+
         if (playerViews[0].getPlayer().getBridgeCardNum() == 0) restButton.setDisable(true);
-        StackPane.setMargin(restButton, new Insets(100, 0, 0, 0));
+        StackPane.setMargin(restButton, new Insets(85, 0, 0, 0));
 
         diceButton.setOnAction(actionEvent -> {
             myItemClick.onRollDiceClick(diceButton, restButton);

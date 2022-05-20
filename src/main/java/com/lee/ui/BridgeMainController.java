@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -21,6 +22,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
@@ -49,12 +51,12 @@ public class BridgeMainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         playerNumBtn.setOnAction((ActionEvent -> {
-            playerNumCheck();
+            gameInit();
         }));
 
         playerNumTF.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode().equals(KeyCode.ENTER)){
-                playerNumCheck();
+                gameInit();
             }
         });
         settingBtn.setOnAction((ActionEvent -> {
@@ -62,7 +64,7 @@ public class BridgeMainController implements Initializable {
         }));
     }
 
-    private void playerNumCheck() {
+    private void gameInit() {
         String strNum = playerNumTF.getText();
         if (strNum.isEmpty()) {
             mainActionLabel.setText("숫자를 입력해 주세요. (2 ~ 4)");
@@ -96,14 +98,6 @@ public class BridgeMainController implements Initializable {
                 stackPane.getChildren().add(bridgeMapView.getContentPane());
 
                 playBridgeGame(bridgeMapView);
-//
-//                Stage primaryStage = BridgeGame.getStage();
-//                Scene scene = new Scene(new BridgeMapView().getContentPane());
-//                primaryStage.setScene(scene);
-//                primaryStage.setX(500);
-//                primaryStage.setY(50);
-//                primaryStage.show();
-
             } catch (Exception e){
                 e.printStackTrace();
             }
@@ -127,13 +121,11 @@ public class BridgeMainController implements Initializable {
 
                 Pane root = (Pane) bridgeMapView.getContentPane();
                 StackPane dicePane = new StackPane();
-                dicePane.setPrefSize(200, 250);
-                dicePane.relocate(root.getPrefWidth()-300, 500);
+                dicePane.setPrefSize(350, 230);
+                dicePane.relocate(root.getPrefWidth()-280, 200);
 
-                Rectangle rectangle = new Rectangle();
-                rectangle.setWidth(200);
-                rectangle.setHeight(300);
-                rectangle.setFill(Color.GOLD);
+                Rectangle rectangle = new Rectangle(350, 230);
+                rectangle.setFill(Color.WHITE);
                 rectangle.setStroke(Color.BLACK);
                 rectangle.setStrokeWidth(2);
 
@@ -142,13 +134,18 @@ public class BridgeMainController implements Initializable {
                 diceImage.setFitHeight(100);
                 diceImage.setFitWidth(100);
                 diceImage.setPreserveRatio(true);
-
                 StackPane.setAlignment(diceImage, Pos.TOP_LEFT);
-                StackPane.setMargin(diceImage, new Insets(20, 0, 0, 20));
+                StackPane.setMargin(diceImage, new Insets(20, 0, 0, 10));
 
                 Button rollButton = new Button("Roll");
-                StackPane.setAlignment(rollButton, Pos.TOP_RIGHT);
-                StackPane.setMargin(rollButton, new Insets(60, 20 , 0, 0));
+                rollButton.setPrefSize(50, 30);
+                StackPane.setAlignment(rollButton, Pos.BOTTOM_LEFT);
+                StackPane.setMargin(rollButton, new Insets(0, 0 , 50, 35));
+
+                Label rollLabel = new Label("Click Roll button to \nroll a dice.");
+                rollLabel.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 18));
+                StackPane.setAlignment(rollLabel, Pos.TOP_RIGHT);
+                StackPane.setMargin(rollLabel, new Insets(20, 40, 0 , 0));
 
                 TextField moveTF = new TextField();
                 moveTF.setPrefSize(150, 30);
@@ -157,19 +154,20 @@ public class BridgeMainController implements Initializable {
                 moveTF.setPromptText("Combinations of U,D,L,R");
                 moveTF.setFocusTraversable(false);
                 moveTF.setDisable(true);
-                StackPane.setAlignment(moveTF, Pos.CENTER);
-                StackPane.setMargin(moveTF, new Insets(40, 0, 0, 0));
+                StackPane.setAlignment(moveTF, Pos.CENTER_RIGHT);
+                StackPane.setMargin(moveTF, new Insets(0, 35, 20, 0));
 
                 Button exitButton = new Button("Exit");
+                exitButton.setPrefSize(50, 30);
                 exitButton.setDisable(true);
-                StackPane.setAlignment(exitButton, Pos.BOTTOM_CENTER);
-                StackPane.setMargin(exitButton, new Insets(0, 0, 20, 0));
+                StackPane.setAlignment(exitButton, Pos.BOTTOM_RIGHT);
+                StackPane.setMargin(exitButton, new Insets(0, 35, 50, 0));
 
-                dicePane.getChildren().addAll(rectangle, diceImage, rollButton, moveTF, exitButton);
+                dicePane.getChildren().addAll(rectangle, diceImage, rollButton, rollLabel, moveTF, exitButton);
                 root.getChildren().add(dicePane);
 
                 rollButton.setOnAction(actionEvent -> {
-                    roll(diceImage, rollButton, exitButton , moveTF, bridgeMapView);
+                    roll(diceImage, rollButton, exitButton, moveTF, bridgeMapView);
                 });
 
                 exitButton.setOnAction(actionEvent -> {
@@ -258,7 +256,7 @@ public class BridgeMainController implements Initializable {
                 }
             }
         };
-
         thread.start();
     }
+
 }
