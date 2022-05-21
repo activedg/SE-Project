@@ -1,7 +1,12 @@
 package com.lee.model;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class BridgeMap {
     private static BridgeMap m = null;
+    private boolean isMapSet = false;
     private String[] mapData;
 
     public static BridgeMap getInstance(){
@@ -11,20 +16,130 @@ public class BridgeMap {
     }
 
     public void defaultMap(){
-        mapData = new String[] {
-                "S R", "C L R", "C L D", "B U D", "S U D", "C U D", "C U D", "C U R", "C L R", "H L U", "B D U", "C D U", "C D U",
-                "C D U", "b D U", "P D U", "C D R", "C L R", "H L D", "C U D", "C U D", "C U D", "B U D", "C U D", "b U D","C U D",
-                "S U D", "P U D", "C U D", "C U D", "C U R", "C L R", "C L U", "H D U", "C D U", "B D U", "C D U", "C D U", "C D U",
-                "C D U", "b D U", "C D R", "C L R", "H L D", "C U D", "C U D", "C U D", "P U D", "B U D", "b U D", "C U D", "H U D",
-                "C U R", "C L R", "S L U", "P D U", "C D U", "C D U", "b D U", "C D U", "C D U", "E"
-        };
+        File file = new File("src/main/resources/com/lee/mapdata/defaultMap.txt");
+        if (file.exists()) {
+            ArrayList<String> mapData = new ArrayList<>();
+            BufferedReader br;
+            try {
+                br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    mapData.add(line);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.mapData = mapData.toArray(new String[mapData.size()]);
+        } else{
+            mapData = new String[] {
+                    "S R", "C L R", "C L D", "B U D", "S U D", "C U D", "C U D", "C U R", "C L R", "H L U", "B D U", "C D U", "C D U",
+                    "C D U", "b D U", "P D U", "C D R", "C L R", "H L D", "C U D", "C U D", "C U D", "B U D", "C U D", "b U D","C U D",
+                    "S U D", "P U D", "C U D", "C U D", "C U R", "C L R", "C L U", "H D U", "C D U", "B D U", "C D U", "C D U", "C D U",
+                    "C D U", "b D U", "C D R", "C L R", "H L D", "C U D", "C U D", "C U D", "P U D", "B U D", "b U D", "C U D", "H U D",
+                    "C U R", "C L R", "S L U", "P D U", "C D U", "C D U", "b D U", "C D U", "C D U", "E"
+            };
+        }
     }
 
     public String[] getMapData(){
+        if (isMapSet == false){
+            defaultMap();
+            isMapSet = true;
+        }
         return mapData;
     }
 
-    public void setMapData(){
-
+    public void setMapData(String[] mapData){
+        this.mapData = mapData;
+        isMapSet = true;
     }
+
+    public int getMapWidth(){
+        int leftCount = 0;
+        int rightCount = 0;
+        int heightMax = 0;
+        for (int i=0; i< mapData.length; i++){
+            if (mapData[i].endsWith("L")){
+                leftCount++;
+                if(rightCount > 0) rightCount--;
+                if(leftCount > heightMax)
+                    heightMax = leftCount;
+            }
+            else if (mapData[i].endsWith("R")){
+                rightCount++;
+                if(leftCount > 0) leftCount--;
+                if(rightCount > heightMax)
+                    heightMax = rightCount;
+            }
+        }
+        return heightMax+1;
+    }
+
+    public int getMapHeight(){
+        int upCount = 0;
+        int downCount = 0;
+        int heightMax = 0;
+        for (int i=0; i< mapData.length; i++){
+            if (mapData[i].endsWith("U")){
+                downCount++;
+                if(upCount > 0) upCount--;
+                if(downCount > heightMax)
+                    heightMax = downCount;
+            }
+            else if (mapData[i].endsWith("D")){
+                upCount++;
+                if(downCount > 0) downCount--;
+                if(upCount > heightMax)
+                    heightMax = upCount;
+            }
+        }
+        return heightMax+1;
+    }
+
+    public int getStartHeightGap(){
+        int upCount = 0;
+        int downCount = 0;
+        int gapMax = 0;
+        for (int i=0; i< mapData.length; i++){
+            if (mapData[i].endsWith("U"))
+                upCount++;
+            else if (mapData[i].endsWith("D"))
+                downCount++;
+            else {
+                if (downCount > 0 && upCount > 0){
+                    if (upCount- downCount > gapMax){
+                        gapMax = upCount - downCount;
+                        upCount = 0;
+                        downCount = 0;
+                    }
+                }
+            }
+        }
+        return gapMax > 0 ? gapMax : 0;
+    }
+
+    public int getStartWidthGap(){
+        int leftCount = 0;
+        int rightCount = 0;
+        int gapMax = 0;
+        for (int i=0; i< mapData.length; i++){
+            if (mapData[i].endsWith("L"))
+                leftCount++;
+            else if (mapData[i].endsWith("R"))
+                rightCount++;
+            else {
+                if (leftCount > 0 && rightCount > 0){
+                    if (leftCount- rightCount > gapMax){
+                        gapMax = leftCount - rightCount;
+                        leftCount = 0;
+                        rightCount = 0;
+                    }
+                }
+            }
+        }
+        return gapMax > 0 ? gapMax : 0;
+    }
+
 }

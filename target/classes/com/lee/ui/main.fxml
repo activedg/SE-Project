@@ -14,16 +14,14 @@
                <font>
                   <Font name="Berlin Sans FB Bold" size="30.0" />
                </font>
-               <VBox.margin>
-                  <Insets />
-               </VBox.margin>
+
             </Label>
-            <Label fx:id="mainActionLabel" text="플레이 할 플레이어 수를 입력하세요. (2~4)">
+            <Label fx:id="mainActionLabel" prefHeight="50.0"  text="플레이 할 플레이어 수를 입력하세요. (2~4)" alignment="BOTTOM_CENTER">
                <font>
                   <Font name="Hancom Gothic Regular" size="12.0" />
                </font>
                <VBox.margin>
-                  <Insets top="30.0" />
+                  <Insets bottom="5.0" />
                </VBox.margin>
             </Label>
             <HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="50.0" prefWidth="200.0">
@@ -31,17 +29,15 @@
                   <font>
                      <Font name="Hancom Gothic Regular" size="12.0" />
                   </font></TextField>
-               <Button fx:id="playerNumBtn" mnemonicParsing="false" text="입력 확인">
+               <Button fx:id="playerNumBtn" mnemonicParsing="false" text="입력 확인" prefWidth="70" prefHeight="30">
                   <HBox.margin>
                      <Insets left="10.0" />
                   </HBox.margin></Button>
             </HBox>
-            <Button fx:id="settingBtn" layoutX="100.0" layoutY="100.0" mnemonicParsing="false" style="-fx-background-color: black;">
-               <graphic>
-                  <ImageView accessibleRole="BUTTON" fitHeight="32.0" fitWidth="32.0" pickOnBounds="true" preserveRatio="true">
-                     <Image url="@../image/setting.png" />
-                  </ImageView>
-               </graphic>
+            <Button fx:id="fileBtn" layoutX="100.0" layoutY="100.0" mnemonicParsing="false" text = "맵 설정" prefWidth="60" prefHeight="30">
+               <VBox.margin>
+                  <Insets top="5.0"/>
+               </VBox.margin>
             </Button>
          </children>
          <StackPane.margin>

@@ -1,5 +1,6 @@
 package com.lee.ui;
 
+import com.lee.model.BridgeMap;
 import com.lee.model.Player;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -19,10 +20,12 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
+import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -46,7 +49,7 @@ public class BridgeMainController implements Initializable {
 
     @FXML private TextField playerNumTF;
 
-    @FXML private Button settingBtn;
+    @FXML private Button fileBtn;
 
 
     @Override
@@ -60,8 +63,8 @@ public class BridgeMainController implements Initializable {
                 gameInit();
             }
         });
-        settingBtn.setOnAction((ActionEvent -> {
-            loadSetting();
+        fileBtn.setOnAction((ActionEvent -> {
+            loadFile();
         }));
     }
 
@@ -94,9 +97,8 @@ public class BridgeMainController implements Initializable {
                 primaryStage.setWidth(1250);
                 primaryStage.setHeight(900);
                 BridgeMapView bridgeMapView = new BridgeMapView();
-                bridgeMapView.setMap();
                 stackPane.getChildren().remove(0);
-                stackPane.getChildren().add(bridgeMapView.getContentPane());
+                stackPane.getChildren().add(bridgeMapView.getScrollPane());
 
                 playBridgeGame(bridgeMapView);
             } catch (Exception e){
@@ -106,8 +108,29 @@ public class BridgeMainController implements Initializable {
     }
     public static int getPlayerNum() {return playerNum;}
 
-    private void loadSetting(){
-        StackPane stackPane = (StackPane) settingBtn.getScene().getRoot();
+    private void loadFile(){
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("텍스트 파일(*.txt)", "*.txt"));
+        File file = fileChooser.showOpenDialog(BridgeGame.getStage());
+
+        if (file != null) {
+            ArrayList<String> mapData = new ArrayList<>();
+            BufferedReader br;
+            try {
+                br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    mapData.add(line);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            BridgeMap.getInstance().setMapData(mapData.toArray(new String[mapData.size()]));
+            mainActionLabel.setText("\t    맵 데이터가 변경되었습니다. \n플레이 할 플레이어 수를 입력하세요. (2~4)");
+        }
+        else mainActionLabel.setText("플레이 할 플레이어 수를 입력하세요. (2~4)");
 
     }
 
@@ -123,7 +146,7 @@ public class BridgeMainController implements Initializable {
                 Pane root = (Pane) bridgeMapView.getContentPane();
                 StackPane dicePane = new StackPane();
                 dicePane.setPrefSize(350, 230);
-                dicePane.relocate(root.getPrefWidth()-280, 200);
+                dicePane.relocate(820, 200);
 
                 Rectangle rectangle = new Rectangle(350, 230);
                 rectangle.setFill(Color.WHITE);
@@ -182,7 +205,7 @@ public class BridgeMainController implements Initializable {
 
                 moveTF.setOnKeyPressed(keyEvent -> {
                     if (keyEvent.getCode().equals(KeyCode.ENTER)){
-                        String moveStr = moveTF.getText().toString().toUpperCase(Locale.ROOT);
+                        String moveStr = moveTF.getText().toUpperCase(Locale.ROOT);
                         if (moveStr.isEmpty()){
                             rollLabel.setText("Length should be "+moveCount +".\nInput combinations of \nU, D, L, R or u, d, l, r.");
                         }
@@ -213,6 +236,11 @@ public class BridgeMainController implements Initializable {
                     e.printStackTrace();
                 }
                 bridgeMapView.updatePlayerCardInfo("Bridge", 1);
+            }
+
+            @Override
+            public void onExitClick() {
+                System.exit(1);
             }
         });
     }

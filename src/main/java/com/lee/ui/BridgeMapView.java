@@ -9,49 +9,48 @@ import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.*;
 
+
 public class BridgeMapView {
     public static final int TILE_SIZE = 36;
-    public static final int WIDTH = 25;
-    public static final int HEIGHT = 25;
-
-    public static final int START_X = 3;
-    public static final int START_Y = 8;
+    public static int WIDTH = 25;
+    public static int HEIGHT = 18;
+    public static int START_X = 3;
+    public static int START_Y = 5;
 
     public static final Color[] colors = {Color.BLUE, Color.RED, Color.GREEN, Color.PURPLE};
 
-    private int x = START_X, y= START_Y;
-    private int endCount = 0;
+    private int x, y;
     private Pane root;
+    private ScrollPane scrollPane;
+    private StackPane infoPane, turnPane;
     private Group tileGroup = new Group();
+    private Tile[][] tiles;
     private BridgeMap map;
 
-    private Tile[][] tiles = new Tile[WIDTH + 1][HEIGHT + 1];
     private int playerNum = 0;
     private int turn = 1;
+    private int endCount = 0;
+    private int[] endOrders;
     private PlayerView[] playerViews;
     private Label[][] playerCards;
     private Label turnLabel;
 
     public BridgeMapView(){
-        map = BridgeMap.getInstance();
-        playerNum = BridgeMainController.getPlayerNum();
-        playerViews = new PlayerView[playerNum];
-
-        root = new Pane();
-        root.setPrefSize(WIDTH * TILE_SIZE + 200, HEIGHT * TILE_SIZE + 200);
-        root.getChildren().add(tileGroup);
+        initMap();
     }
 
     private onItemClick myItemClick;
     public interface onItemClick {
         void onRollDiceClick(Button diceButton, Button restButton);
         void onRestClick();
+        void onExitClick();
     }
     public void setMyClickListener(onItemClick myItemClick){
         this.myItemClick = myItemClick;
@@ -60,25 +59,29 @@ public class BridgeMapView {
     public Parent getContentPane(){
         return root;
     }
+    public Parent getScrollPane() { return scrollPane;}
     public Player getCurrentPlayer(){
         return playerViews[turn-1].getPlayer();
     }
-    public int getEndCount() {return endCount; }
 
-    public void setMap(){
-        // 나중에 지워야 함
-        map.defaultMap();
+    public void initMap(){
+        map = BridgeMap.getInstance();
+        playerNum = BridgeMainController.getPlayerNum();
+        playerViews = new PlayerView[playerNum];
+
+        initEndOrders();
         String mapData[] = map.getMapData();
+        initMapSize();
         if (mapData == null){
             throw new IllegalArgumentException("map 데이터가 null 일 수 없습니다.");
         }
 
+        String prevMove = null;
         for (int i = 0; i < mapData.length; i++) {
             String[] temp = mapData[i].split(" ");
             Tile tile;
             if (i == 0 && temp[0].equals("S")) {
                 tile = new Tile("START", x, y, null, temp[1]);
-                // tiles[x][y] = tile;
                 switch (temp[1]) {
                     case "R":
                         tiles[x+1][y] = tile;
@@ -90,9 +93,12 @@ public class BridgeMapView {
                         break;
                 }
                 initPlayerPos(temp[1]);
-            } else if (i == mapData.length - 1 && temp[0].equals("E")) {
-                tile = new Tile("END", x, y, null, null);
+            } else if (temp[0].equals("E")) {
+                if (prevMove.equals("U") || prevMove.equals("R"))
+                    tile = new Tile("END", x, y - 1, null, null);
+                else tile = new Tile("END", x, y, null, null);
                 tiles[x][y] = tile;
+
             } else if (temp[0].equals("S")){
                 tile = new Tile("SAW", x ,y, temp[1], temp[2]);
                 tiles[x][y] = tile;
@@ -117,12 +123,45 @@ public class BridgeMapView {
                 tile = new Tile("CELL", x, y, temp[1], temp[2]);
                 tiles[x][y] = tile;
                 setNextXY(temp[2]);
+
             }
             tileGroup.getChildren().add(tile);
+            if ( 1 <= i && i < mapData.length - 1) prevMove = temp[2];
+
         }
 
         initPlayerInfo();
         initTurnInfo();
+
+    }
+    private void initEndOrders(){
+        endOrders = new int[playerNum];
+        for (int i=0; i< playerNum; i++){
+            endOrders[i] = -1;
+        }
+    }
+
+    private void initMapSize(){
+        int width = map.getMapWidth();
+        int height = map.getMapHeight();
+        int widthGap = map.getStartWidthGap();
+        int heightGap = map.getStartHeightGap();
+
+        START_X += widthGap;
+        START_Y += heightGap;
+        WIDTH = START_X + width;
+        HEIGHT = START_Y + height;
+
+        x = START_X;
+        y = START_Y;
+        tiles = new Tile[WIDTH + 1][HEIGHT + 1];
+
+        scrollPane = new ScrollPane();
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        root = new Pane();
+        root.setPrefSize(WIDTH * TILE_SIZE + 150, HEIGHT * TILE_SIZE + 150);
+        root.getChildren().add(tileGroup);
+        scrollPane.setContent(root);
     }
 
     private void setNextXY(String t){
@@ -136,6 +175,9 @@ public class BridgeMapView {
             case "U":
                 y--;
                 break;
+            case "L":
+                x--;
+                break;
         }
     }
 
@@ -144,26 +186,34 @@ public class BridgeMapView {
         int temp_y = START_Y;
 
         // 임시
-        int temp_margin = 4;
+        int temp_XMargin = 0;
+        int temp_YMargin = 0;
 
-        if (s.equals("R"))
+        if (s.equals("R")) {
+            temp_XMargin = 12;
+            temp_YMargin = 4;
             temp_x++;
-        else temp_y++;
+        }
+        else {
+            temp_YMargin = 12;
+            temp_XMargin = 4;
+            temp_y++;
+        }
 
         for (int i=0; i<playerNum; i++) {
             playerViews[i] = new PlayerView(i+1, temp_x, temp_y, colors[i]);
             StackPane.setAlignment(playerViews[i], Pos.BASELINE_CENTER);
-            playerViews[i].relocate(temp_x * TILE_SIZE + 12, temp_y * TILE_SIZE + temp_margin);
+            playerViews[i].relocate(temp_x * TILE_SIZE + temp_XMargin, temp_y * TILE_SIZE + temp_YMargin);
             playerViews[i].getPlayer().setPos(temp_x, temp_y);
-            temp_margin += 14;
+            if (s.equals("R")) temp_YMargin += 12;
+            else temp_XMargin += 12;
             root.getChildren().add(playerViews[i]);
         }
-
     }
 
     private void initPlayerInfo(){
         int width = 720;
-        StackPane infoPane = new StackPane();
+        infoPane = new StackPane();
         infoPane.setPrefSize(width, 120);
         infoPane.relocate(2 * TILE_SIZE, 10);
         infoPane.setAlignment(Pos.CENTER_LEFT);
@@ -235,7 +285,7 @@ public class BridgeMapView {
     }
 
     private void initTurnInfo(){
-        StackPane turnPane = new StackPane();
+        turnPane = new StackPane();
         turnPane.setPrefSize(350, 125);
         turnPane.relocate(820, 15);
 
@@ -278,6 +328,9 @@ public class BridgeMapView {
 
     public void changeTurn(Button restButton){
         turn = (playerNum == turn) ? 1 : turn + 1;
+        while (endOrders[turn-1] != -1){
+            turn = (playerNum == turn) ? 1 : turn + 1;
+        }
         turnLabel.setText("Player " + turn + " Turn");
         turnLabel.setTextFill(colors[turn-1]);
 
@@ -311,12 +364,19 @@ public class BridgeMapView {
                 default:
                     return false;
             }
+            if (curX > WIDTH || curY > HEIGHT)
+                return false;
+
             if (tiles[curX][curY] == null)
                 return false;
 
+            if (tiles[curX][curY].getType() == "END")
+                return true;
+
             if (endCount >= 1){
-                if (tiles[curX][curY].isBackMove(temp.toString()))
+                if (tiles[curX][curY].isBackMove(temp.toString())) {
                     return false;
+                }
             }
 
         }
@@ -345,7 +405,7 @@ public class BridgeMapView {
                                 curX--;
                                 break;
                         }
-                        Thread.sleep(1000);
+                        Thread.sleep(500);
                         switch (tiles[curX][curY].getType()){
                             case "BRIDGE":
                                 playerViews[turn-1].setIsOnBridge(true, temp);
@@ -382,19 +442,32 @@ public class BridgeMapView {
                                 break;
                             case "END":
                                 endCount++;
+                                endOrders[turn-1] = endCount;
+                                getCurrentPlayer().gainRankScore(endCount);
+
                                 playerViews[turn-1].relocate(curX * TILE_SIZE + 8, curY * TILE_SIZE + 8);
                                 Platform.runLater(new Runnable() {
                                     @Override
                                     public void run() {
                                         exitButton.setDisable(false);
                                         if (endCount == 1){
-                                            rollLabel.setText("Player "+ turn + " finish!!\nCannot move backwards since now.");
+                                            rollLabel.setText("Player "+ turn + " finish!!\nCannot move backwards\nfrom now on.");
                                         }
                                         else rollLabel.setText("Player "+ turn + " finish!!\n");
                                     }
                                 });
-                                this.interrupt();
+
+                                if (endCount == playerNum - 1){
+                                    Platform.runLater(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            endGame();
+                                        }
+                                    });
+                                    this.interrupt();
+                                }
                                 return;
+
                             default:
                                 if (playerViews[turn-1].getIsOnBridge()){
                                     if (playerViews[turn-1].checkBridgeCrossed(temp)){
@@ -427,4 +500,78 @@ public class BridgeMapView {
         };
         thread.start();
     }
+
+    private void endGame(){
+        turnPane.getChildren().remove(2);
+        turnPane.getChildren().remove(2);
+
+        turnLabel.setText("End Game");
+        turnLabel.setTextFill(Color.BLACK);
+        turnPane.setAlignment(Pos.TOP_CENTER);
+        StackPane.setMargin(turnLabel, new Insets(10, 0, 0, 0));
+
+        Button exitButton = new Button("Exit");
+        exitButton.setPrefSize(120, 30);
+        exitButton.setFont(Font.font("Arial",14));
+        StackPane.setMargin(exitButton, new Insets(45, 0, 0 , 0));
+        turnPane.getChildren().add(exitButton);
+        exitButton.setOnAction(actionEvent -> {
+            myItemClick.onExitClick();
+        });
+
+        StackPane resPane = new StackPane();
+        resPane.setPrefSize(350, 230);
+        resPane.relocate(820, 200);
+        resPane.setAlignment(Pos.TOP_CENTER);
+        root.getChildren().add(resPane);
+
+        Rectangle rectangle = new Rectangle(350, 230);
+        rectangle.setFill(Color.WHITE);
+        rectangle.setStroke(Color.BLACK);
+        rectangle.setStrokeWidth(2);
+        resPane.getChildren().add(rectangle);
+
+        Label scoreLabel = new Label("Score");
+        scoreLabel.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 18));
+        StackPane.setAlignment(scoreLabel, Pos.TOP_CENTER);
+        StackPane.setMargin(scoreLabel, new Insets(10, 0, 0, 0));
+        resPane.getChildren().add(scoreLabel);
+
+        Label[] playerScores = new Label[playerNum];
+        int yMargin = 0;
+        for (int i=0; i<playerNum; i++) {
+            if (playerNum == 3 && endOrders[i] == -1) playerViews[i].getPlayer().gainRankScore(3);
+            else if (playerNum == 2 && endOrders[i] == -1) playerViews[i].getPlayer().gainRankScore(2);
+            playerScores[i] = new Label("Player " + (i + 1) + " : " +playerViews[i].getPlayer().getScore() +" points");
+            playerScores[i].setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 17));
+            playerScores[i].setTextFill(colors[i]);
+            StackPane.setAlignment(playerScores[i], Pos.CENTER_LEFT);
+            StackPane.setMargin(playerScores[i], new Insets(yMargin, 0, 20, 30));
+            resPane.getChildren().add(playerScores[i]);
+            yMargin += 60;
+        }
+
+        int winnerId = getFirstRankPlayerId();
+        Label resLabel = new Label("Winner is Player " + winnerId +" !!");
+        resLabel.setTextFill(Color.FIREBRICK);
+        resLabel.setFont(Font.font("Verdana", FontWeight.BOLD, FontPosture.REGULAR, 24));
+        StackPane.setAlignment(resLabel, Pos.TOP_CENTER);
+        StackPane.setMargin(resLabel, new Insets(45, 0, 0, 0));
+
+        resPane.getChildren().add(resLabel);
+    }
+
+    private int getFirstRankPlayerId(){
+        int max = playerViews[0].getPlayer().getScore(), idx = 0;
+        int temp;
+        for (int i=0; i<playerNum; i++){
+            temp = playerViews[i].getPlayer().getScore();
+            if (max < temp){
+                max = temp;
+                idx = i;
+            }
+        }
+        return (idx+1);
+    }
 }
+

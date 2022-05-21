@@ -95,7 +95,23 @@ public class Tile extends StackPane {
         type = "CELL";
     }
 
-    public boolean isBackMove(String backMove){
-        return this.backMove.equals(backMove);
+    // 다음 타일의 frontMove가 현재 움직일려는 move의 반대면 뒤로 가는 것이다.
+    public boolean isBackMove(String input){
+        if(backMove == null) return true;
+        switch(frontMove){
+            case "R":
+                if (input.equals("L")) return true;
+                break;
+            case "L":
+                if (input.equals("R")) return true;
+                break;
+            case "U":
+                if (input.equals("D")) return true;
+                break;
+            case "D":
+                if (input.equals("U")) return true;
+                break;
+        }
+        return false;
     }
 }

@@ -46,6 +46,8 @@ public class Player{
 
     public int getYPos() {return yPos;}
 
+    public int getScore() {return score;}
+
     public void gainBridgeCard() {
         bridgeCardNum++;
     }
@@ -63,5 +65,19 @@ public class Player{
     public void gainPhilipsCard() {
         philipsCardNum++;
         score += 1;
+    }
+
+    public void gainRankScore(int rank){
+        switch (rank){
+            case 1:
+                score += 7;
+                break;
+            case 2:
+                score += 3;
+                break;
+            case 3:
+                score += 1;
+                break;
+        }
     }
 }
