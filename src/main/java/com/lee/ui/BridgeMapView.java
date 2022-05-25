@@ -562,13 +562,16 @@ public class BridgeMapView {
     }
 
     private int getFirstRankPlayerId(){
-        int max = playerViews[0].getPlayer().getScore(), idx = 0;
+        int max = -1, idx = 0;
         int temp;
         for (int i=0; i<playerNum; i++){
             temp = playerViews[i].getPlayer().getScore();
             if (max < temp){
                 max = temp;
                 idx = i;
+            } else if (max == temp) {
+                if (endOrders[idx] > i)
+                    idx = i;
             }
         }
         return (idx+1);
