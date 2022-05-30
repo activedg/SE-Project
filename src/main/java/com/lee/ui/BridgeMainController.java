@@ -110,7 +110,7 @@ public class BridgeMainController implements Initializable {
 
     private void loadFile(){
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("텍스트 파일(*.txt)", "*.txt"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Map 파일(*.map)", "*.map"));
         File file = fileChooser.showOpenDialog(BridgeGame.getStage());
 
         if (file != null) {
