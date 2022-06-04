@@ -20,20 +20,25 @@ import javafx.scene.text.FontWeight;
 
 
 public class BridgeMapView {
+    // 타일 사이즈 및 플레이어 뷰의 컬러, 시작 위치 등을 정의
     public static final int TILE_SIZE = 36;
     public static final Color[] colors = {Color.BLUE, Color.RED, Color.GREEN, Color.PURPLE};
     public static int WIDTH = 25;
     public static int HEIGHT = 18;
     public static int START_X = 3;
     public static int START_Y = 5;
+
     private int x, y;
     private Pane root;
     private ScrollPane scrollPane;
     private StackPane infoPane, turnPane;
     private Group tileGroup = new Group();
+
+    // 맵을 구성하는 타일 객체의 배열과 Model 클래스의 객체
     private Tile[][] tiles;
     private BridgeMap map;
 
+    // 게임에 사용되는 초기 설정값들
     private int playerNum = 0;
     private int turn = 1;
     private int endCount = 0;
@@ -42,6 +47,8 @@ public class BridgeMapView {
     private Label[][] playerCards;
     private Label turnLabel;
     private onItemClick myItemClick;
+
+    // 버튼 클릭시 수행 행동을 인터페이스에 정의하고 컨트롤러에서 이를 구현하게 하여 클릭 리스너를 컨트롤러에 선언
     public interface onItemClick {
         void onRollDiceClick(Button diceButton, Button restButton);
 
@@ -50,14 +57,15 @@ public class BridgeMapView {
         void onExitClick();
     }
 
-    public BridgeMapView() {
-        initMap();
-    }
-
     public void setMyClickListener(onItemClick myItemClick) {
         this.myItemClick = myItemClick;
     }
 
+    public BridgeMapView() {
+        initMap();
+    }
+
+    // 각종 getter
     public Parent getContentPane() {
         return root;
     }
@@ -70,8 +78,10 @@ public class BridgeMapView {
         return playerViews[turn - 1].getPlayer();
     }
 
+    // 초기 맵 설정 함수
     public void initMap() {
         map = BridgeMap.getInstance();
+        // 입력 받은 플레이어 수 만큼 플레이어 뷰 객체 생성
         playerNum = BridgeMainController.getPlayerNum();
         playerViews = new PlayerView[playerNum];
 
@@ -83,6 +93,7 @@ public class BridgeMapView {
         }
 
         String prevMove = null;
+        // mapData의 각 줄의 첫 번째 값에 따라 타일 객체 생성자 호출
         for (int i = 0; i < mapData.length; i++) {
             String[] temp = mapData[i].split(" ");
             Tile tile;
@@ -140,6 +151,7 @@ public class BridgeMapView {
 
     }
 
+    // 끝난 순서를 담는 array 초기화
     private void initEndOrders() {
         endOrders = new int[playerNum];
         for (int i = 0; i < playerNum; i++) {
@@ -147,6 +159,7 @@ public class BridgeMapView {
         }
     }
 
+    // 맵 사이즈 초기화
     private void initMapSize() {
         int width = map.getMapWidth();
         int height = map.getMapHeight();
@@ -170,8 +183,7 @@ public class BridgeMapView {
         scrollPane.setContent(root);
     }
 
-
-
+    // player들 시작 위치로 배치
     private void initPlayerPos(String s) {
         int temp_x = START_X;
         int temp_y = START_Y;
@@ -200,6 +212,7 @@ public class BridgeMapView {
         }
     }
 
+    // 각 플레이어의 카드 각각의 수가 담긴 보드 판 생성
     private void initPlayerInfo() {
         int width = 720;
         infoPane = new StackPane();
@@ -273,6 +286,7 @@ public class BridgeMapView {
         root.getChildren().add(infoPane);
     }
 
+    // 현재 턴 정보를 보여주는 판 생성
     private void initTurnInfo() {
         turnPane = new StackPane();
         turnPane.setPrefSize(350, 125);
@@ -315,6 +329,7 @@ public class BridgeMapView {
         root.getChildren().add(turnPane);
     }
 
+    //
     private void setNextXY(String t) {
         switch (t) {
             case "R":

@@ -68,6 +68,7 @@ public class BridgeMainController implements Initializable {
         }));
     }
 
+    // 시작 화면을 설정하는 함수
     private void gameInit() {
         String strNum = playerNumTF.getText();
         if (strNum.isEmpty()) {
@@ -107,8 +108,10 @@ public class BridgeMainController implements Initializable {
             }
         }
     }
+    // 플레이어 숫자 getter
     public static int getPlayerNum() {return playerNum;}
 
+    // 파일 설정 버튼을 클릭한 경우
     private void loadFile(){
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Map 파일(*.map)", "*.map"));
@@ -135,15 +138,18 @@ public class BridgeMainController implements Initializable {
 
     }
 
+    // BridgeGame 게임 화면 내부의 버튼들의 클릭과 인풋 입력을 관리하는 함수
     private void playBridgeGame(BridgeMapView bridgeMapView){
         bridgeMapView.setMyClickListener(new BridgeMapView.onItemClick() {
             @Override
             public void onRollDiceClick(Button diceButton, Button restButton) {
+                // 다른 버튼들 비활성화
                 diceButton.setDisable(true);
                 restButton.setDisable(true);
-                // Initialize curPlayer
+                // 현재 플레이어
                 curPlayer = bridgeMapView.getCurrentPlayer();
 
+                // 주사위 화면을 만들고 보여준다
                 Pane root = (Pane) bridgeMapView.getContentPane();
                 StackPane dicePane = new StackPane();
                 dicePane.setPrefSize(350, 230);
@@ -192,10 +198,12 @@ public class BridgeMainController implements Initializable {
                 dicePane.getChildren().addAll(rectangle, diceImage, rollButton, rollLabel, moveTF, exitButton);
                 root.getChildren().add(dicePane);
 
+                // roll 버튼
                 rollButton.setOnAction(actionEvent -> {
                     roll(bridgeMapView);
                 });
 
+                // 주사위 화면 종료 버튼
                 exitButton.setOnAction(actionEvent -> {
                     root.getChildren().remove(dicePane);
                     diceButton.setDisable(false);
@@ -203,7 +211,7 @@ public class BridgeMainController implements Initializable {
                     bridgeMapView.changeTurn(restButton);
                 });
 
-
+                // 주사위 굴린 후 움직일 이동을 입력한 경우
                 moveTF.setOnKeyPressed(keyEvent -> {
                     if (keyEvent.getCode().equals(KeyCode.ENTER)){
                         String moveStr = moveTF.getText().toUpperCase(Locale.ROOT);
@@ -211,6 +219,7 @@ public class BridgeMainController implements Initializable {
                             rollLabel.setText("Length should be "+moveCount +".\nInput combinations of \nU, D, L, R or u, d, l, r.");
                         }
                         else {
+                            // 인풋값의 유효성 검사
                             moveStr = moveStr.replaceAll(" ", "");
                             if (moveStr.length() != moveCount) {
                                 rollLabel.setText("Length should be "+moveCount +".\nInput combinations of \nU, D, L, R or u, d, l, r.");
@@ -218,6 +227,7 @@ public class BridgeMainController implements Initializable {
                             else if (bridgeMapView.checkMoveInfo(moveStr) == false){
                                 rollLabel.setText("Invalid move!! Input again.\nLength should be "+moveCount +".");
                             } else{
+                                // 유효한 경우
                                 rollLabel.setText("Player is moving..");
                                 bridgeMapView.move(moveStr, exitButton, rollLabel);
                                 moveTF.setDisable(true);
@@ -229,6 +239,7 @@ public class BridgeMainController implements Initializable {
 
             @Override
             public void onRestClick() {
+                // rest 버튼 클릭시
                 Player curPlayer = bridgeMapView.getCurrentPlayer();
                 curPlayer.rest();
                 try {
@@ -241,11 +252,13 @@ public class BridgeMainController implements Initializable {
 
             @Override
             public void onExitClick() {
+                // 게임 종료 버튼 클릭시
                 System.exit(1);
             }
         });
     }
 
+    // 주사위를 굴리는 스레드를 생성 후 주사위 결과를 보여주는 함수
     private void roll(BridgeMapView bridgeMapView){
         Random random = new Random();
         final int[] randomNum = {0};
@@ -273,6 +286,8 @@ public class BridgeMainController implements Initializable {
         };
         thread.start();
     }
+
+    // 주사위를 굴린 후 텍스트 필드 및 라벨(얼마나 움직일 수 있는지 보여주는 라벨) 설정
     private void setViewsAfterRoll(BridgeMapView bridgeMapView){
         moveTF.setDisable(false);
         // 이동 가능한 move가 0번일 때
