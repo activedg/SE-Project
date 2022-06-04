@@ -31,24 +31,24 @@ import java.util.Random;
 import java.util.ResourceBundle;
 
 public class BridgeMainController implements Initializable {
+    // 게임 플레이어 수
     private static int playerNum;
-
+    // 현재 플레이어
     private Player curPlayer = null;
+    // 움직일 수 있는 칸 수
     private int moveCount;
 
+    // 주사위 사진 및 버튼, 라벨
     private ImageView diceImage;
     private Button rollButton;
     private Label rollLabel;
     private TextField moveTF;
     private Button exitButton;
 
-
+    // 시작 화면 뷰들
     @FXML private Label mainActionLabel;
-
     @FXML private Button playerNumBtn;
-
     @FXML private TextField playerNumTF;
-
     @FXML private Button fileBtn;
 
 
@@ -86,10 +86,11 @@ public class BridgeMainController implements Initializable {
                 return;
             }
 
-            // Set Number of Players
+            // 플레이어 수 설정
             playerNum = Integer.parseInt(strNum);
 
             try{
+                // 새로운 화면 만들기
                 StackPane stackPane = (StackPane) playerNumBtn.getScene().getRoot();
                 Stage primaryStage = BridgeGame.getStage();
                 primaryStage.setX(500);

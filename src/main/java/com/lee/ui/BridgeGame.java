@@ -8,7 +8,10 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class BridgeGame extends Application {
-    private static Stage mainStage;
+    // 화면이 보이는 Stage
+    public static Stage mainStage;
+
+    // 시작 화면 보여주는 함수
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(BridgeGame.class.getResource("main.fxml"));
@@ -20,6 +23,7 @@ public class BridgeGame extends Application {
         stage.show();
     }
 
+    // Stage getter
     protected static Stage getStage(){
         return mainStage;
     }

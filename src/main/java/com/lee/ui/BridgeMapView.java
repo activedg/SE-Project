@@ -30,7 +30,7 @@ public class BridgeMapView {
     private Pane root;
     private ScrollPane scrollPane;
     private StackPane infoPane, turnPane;
-    private final Group tileGroup = new Group();
+    private Group tileGroup = new Group();
     private Tile[][] tiles;
     private BridgeMap map;
 
@@ -170,28 +170,12 @@ public class BridgeMapView {
         scrollPane.setContent(root);
     }
 
-    private void setNextXY(String t) {
-        switch (t) {
-            case "R":
-                x++;
-                break;
-            case "D":
-                y++;
-                break;
-            case "U":
-                y--;
-                break;
-            case "L":
-                x--;
-                break;
-        }
-    }
+
 
     private void initPlayerPos(String s) {
         int temp_x = START_X;
         int temp_y = START_Y;
 
-        // 임시
         int temp_XMargin = 0;
         int temp_YMargin = 0;
 
@@ -329,6 +313,23 @@ public class BridgeMapView {
         turnPane.getChildren().addAll(rectangle, turnLabel, diceButton, restButton);
 
         root.getChildren().add(turnPane);
+    }
+
+    private void setNextXY(String t) {
+        switch (t) {
+            case "R":
+                x++;
+                break;
+            case "D":
+                y++;
+                break;
+            case "U":
+                y--;
+                break;
+            case "L":
+                x--;
+                break;
+        }
     }
 
     public void changeTurn(Button restButton) {
