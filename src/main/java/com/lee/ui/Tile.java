@@ -16,6 +16,7 @@ import javafx.scene.text.Text;
 import java.io.File;
 
 public class Tile extends StackPane {
+    // 타일의 타입
     private String type;
     private Rectangle rectangle = new Rectangle();
     private String backMove;
@@ -26,6 +27,7 @@ public class Tile extends StackPane {
         this.backMove = backMove;
         this.frontMove = frontMove;
 
+        // 타일의 종류 별로 다르게 보여지도록 생성
         if (type.equals("START") || type.equals("END")){
             rectangle.setWidth(BridgeMapView.TILE_SIZE * 2);
             rectangle.setHeight(BridgeMapView.TILE_SIZE * 2);
@@ -85,6 +87,7 @@ public class Tile extends StackPane {
 
     public String getType() {return type;}
 
+    // 카드를 최초로 획득한 이후 타일에서 카드가 사라지게 함(가정에서 설정함)
     public void removeCard(){
         Platform.runLater(new Runnable() {
             @Override

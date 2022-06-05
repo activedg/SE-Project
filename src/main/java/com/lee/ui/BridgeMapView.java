@@ -329,7 +329,7 @@ public class BridgeMapView {
         root.getChildren().add(turnPane);
     }
 
-    //
+    // mapData의 각 줄의 정보에 따라 다음 타일의 위치를 결정하는 함수
     private void setNextXY(String t) {
         switch (t) {
             case "R":
@@ -347,6 +347,7 @@ public class BridgeMapView {
         }
     }
 
+    // 게임 턴을 다음 플레이어로 넘기는 함수
     public void changeTurn(Button restButton) {
         turn = (playerNum == turn) ? 1 : turn + 1;
         while (endOrders[turn - 1] != -1) {
@@ -358,11 +359,13 @@ public class BridgeMapView {
         restButton.setDisable(playerViews[turn - 1].getPlayer().getBridgeCardNum() == 0);
     }
 
+    // 카드 정보판을 카드별로 업데이트 하는 함수
     public void updatePlayerCardInfo(String type, int i) {
         int temp = playerViews[turn - 1].getPlayer().getTypeCardNum(type);
         playerCards[turn - 1][i].setText(type + " Card : " + temp + " cards");
     }
 
+    // 플레이어가 입력한 문장이 유효한 이동인지 검사하는 함수
     public boolean checkMoveInfo(String moveStr) {
         int curX = getCurrentPlayer().getXPos();
         int curY = getCurrentPlayer().getYPos();
@@ -403,6 +406,7 @@ public class BridgeMapView {
         return true;
     }
 
+    // 스레드를 만들어 단위 초
     public void move(String moveStr, Button exitButton, Label rollLabel) {
         Thread thread = new Thread() {
             private int curX = getCurrentPlayer().getXPos();
@@ -428,6 +432,7 @@ public class BridgeMapView {
                         }
                         Thread.sleep(500);
                         switch (tiles[curX][curY].getType()) {
+                            // 올라간 타일의 종류에 따라 점수 획득 및 카드 획득
                             case "BRIDGE":
                                 playerViews[turn - 1].setIsOnBridge(true, temp);
                                 break;
@@ -477,6 +482,7 @@ public class BridgeMapView {
                                     }
                                 });
 
+                                // 게임 종료조건
                                 if (endCount == playerNum - 1) {
                                     Platform.runLater(new Runnable() {
                                         @Override
@@ -521,6 +527,7 @@ public class BridgeMapView {
         thread.start();
     }
 
+    // 게임을 종료하는 함수(남은 플레이어가 한명일 때)
     private void endGame() {
         turnPane.getChildren().remove(2);
         turnPane.getChildren().remove(2);
@@ -551,12 +558,14 @@ public class BridgeMapView {
         rectangle.setStrokeWidth(2);
         resPane.getChildren().add(rectangle);
 
+        // 점수 결과 판 만드는 함수
         Label scoreLabel = new Label("Score");
         scoreLabel.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 18));
         StackPane.setAlignment(scoreLabel, Pos.TOP_CENTER);
         StackPane.setMargin(scoreLabel, new Insets(10, 0, 0, 0));
         resPane.getChildren().add(scoreLabel);
 
+        // 각 플레이어의 점수를 알려준다
         Label[] playerScores = new Label[playerNum];
         int yMargin = 0;
         for (int i = 0; i < playerNum; i++) {
@@ -571,6 +580,7 @@ public class BridgeMapView {
             yMargin += 60;
         }
 
+        // 승자 알려줌
         int winnerId = getFirstRankPlayerId();
         Label resLabel = new Label("Winner is Player " + winnerId + " !!");
         resLabel.setTextFill(Color.FIREBRICK);
@@ -581,6 +591,7 @@ public class BridgeMapView {
         resPane.getChildren().add(resLabel);
     }
 
+    // 게임 승자의 ID를 알려주는 함수
     private int getFirstRankPlayerId() {
         int max = -1, idx = 0;
         int temp;

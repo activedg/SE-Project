@@ -4,16 +4,19 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class BridgeMap {
+    // Singleton 기법
     public static BridgeMap m = null;
     private boolean isMapSet = false;
     private String[] mapData;
 
+    // BridgeMap 객체가 하나만 생성되게 함
     public static BridgeMap getInstance() {
         if (m == null)
             m = new BridgeMap();
         return m;
     }
 
+    // 초기에 파일을 설정 안한 경우 default.map으로 맵 데이터를 설정함
     public void defaultMap() {
         File file = new File("src/main/resources/com/lee/mapdata/default.map");
         if (file.exists()) {
@@ -30,6 +33,7 @@ public class BridgeMap {
         writeCurMap();
     }
 
+    // getter
     public String[] getMapData() {
         if (isMapSet == false) {
             if (isPrevMapExists()){
@@ -42,12 +46,14 @@ public class BridgeMap {
         return mapData;
     }
 
+    // setter
     public void setMapData(String[] mapData) {
         this.mapData = mapData;
         writeCurMap();
         isMapSet = true;
     }
 
+    // 파일에서 데이터 읽어오기
     private void fileToData(File file){
         ArrayList<String> mapData = new ArrayList<>();
         BufferedReader br;
@@ -65,6 +71,7 @@ public class BridgeMap {
         this.mapData = mapData.toArray(new String[mapData.size()]);
     }
 
+    // 현재 플레이 중인 맵을 작성하는 함수, 다음에 게임을 실행할 때 prev.map을 이용해서 사용함
     private void writeCurMap(){
         try {
             File file = new File("src/main/resources/com/lee/mapdata/prev.map");
@@ -87,6 +94,7 @@ public class BridgeMap {
         return new File("src/main/resources/com/lee/mapdata/prev.map").exists();
     }
 
+    // 맵의 가로 길이
     public int getMapWidth() {
         int leftCount = 0;
         int rightCount = 0;
@@ -107,6 +115,7 @@ public class BridgeMap {
         return heightMax + 1;
     }
 
+    // 맵의 세로 길이
     public int getMapHeight() {
         int upCount = 0;
         int downCount = 0;
@@ -127,6 +136,7 @@ public class BridgeMap {
         return heightMax + 1;
     }
 
+    // 시작 포인트와 게임에서 가장 높은 타일의 높이 차이
     public int getStartHeightGap() {
         int upCount = 0;
         int downCount = 0;
@@ -149,6 +159,7 @@ public class BridgeMap {
         return gapMax > 0 ? gapMax : 0;
     }
 
+    // 시작 포인트와 게임에서 가장 멀리있는 타일의 폭 차이
     public int getStartWidthGap() {
         int leftCount = 0;
         int rightCount = 0;

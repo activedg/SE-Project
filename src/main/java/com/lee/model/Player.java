@@ -1,6 +1,7 @@
 package com.lee.model;
 
 public class Player{
+    // 플레이어 정보들
     private int bridgeCardNum = 0;
     private int sawCardNum = 0;
     private int hammerCardNum = 0;
@@ -20,10 +21,12 @@ public class Player{
         this.yPos = yPos;
     }
 
+    // rest
     public void rest(){
         bridgeCardNum--;
     }
 
+    // getter들
     public int getBridgeCardNum() {return bridgeCardNum;}
 
     public int getSawCardNum() {return sawCardNum;}
@@ -48,6 +51,7 @@ public class Player{
 
     public int getScore() {return score;}
 
+    // 카드를 얻은 경우
     public void gainBridgeCard() {
         bridgeCardNum++;
     }
@@ -67,6 +71,7 @@ public class Player{
         score += 1;
     }
 
+    // 종료 지점에 들어온 순위에 대한 점수를 얻는 함수
     public void gainRankScore(int rank){
         switch (rank){
             case 1:

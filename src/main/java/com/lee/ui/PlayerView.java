@@ -9,10 +9,12 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 public class PlayerView extends StackPane {
+    // 플레이어
     private Player player;
     private Circle circle;
     private Text text;
 
+    // 다리를 지나가는지 판단용
     private Boolean isOnBridge = false;
     private Character moveType;
 
@@ -27,6 +29,7 @@ public class PlayerView extends StackPane {
         getChildren().addAll(circle, text);
     }
 
+    // getter
     public Player getPlayer() {
         return player;
     }
@@ -37,6 +40,7 @@ public class PlayerView extends StackPane {
         this.moveType = moveType;
     }
 
+    // 다리를 지나갔는지 체크하는 함수
     public boolean checkBridgeCrossed(Character nowMove){
         if (isOnBridge && this.moveType == nowMove) return true;
         return false;
